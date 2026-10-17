@@ -1,0 +1,15 @@
+# Normalise line endings in the repository, not in the working tree.
+#
+# The project is edited on Windows (PowerShell, Visual Studio, Rider) and read on Linux runners,
+# so objects are stored with LF and checked out with LF everywhere. Without this, a single edit
+# saved by a Windows editor turns a whole file into a "changed" diff.
+* text=auto eol=lf
+
+# Compiled and binary artefacts: never diff, never convert.
+*.ico binary
+*.msi binary
+*.dll binary
+*.wixpdb binary
+*.png binary
+*.jpg binary
+*.gif binary

@@ -1,0 +1,40 @@
+name: build
+
+# Runs on push to main and on demand only.
+#
+# Do NOT add a `pull_request:` trigger here: the build job below runs on a self-hosted Windows
+# runner with CorelDRAW installed, and a pull request from a fork would execute that fork's code on
+# that machine. Pull requests are covered by docs.yml, which runs on a hosted runner.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  docs-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check the documentation
+        shell: pwsh
+        run: ./docs/check-docs.ps1
+
+  build-test:
+    # A self-hosted Windows runner with CorelDRAW Graphics Suite installed, carrying the
+    # custom label "coreldraw". GitHub-hosted runners cannot build this project: every file
+    # under src/CorelMcpAddon/Tools compiles against Corel.Interop.VGCore.dll, which ships
+    # only with a local CorelDRAW installation.
+    runs-on: [self-hosted, windows, coreldraw]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        run: dotnet build src\CorelMcpAddon\CorelMcpAddon.csproj -c Release -p:CorelDrawVersion=27
+
+      - name: Test
+        run: dotnet test src\CorelMcpAddon.Tests\CorelMcpAddon.Tests.csproj -p:CorelDrawVersion=27

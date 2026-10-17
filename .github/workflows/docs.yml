@@ -1,0 +1,23 @@
+name: docs
+
+# Pull-request checks.
+#
+# Everything that can be validated without CorelDRAW lives here, on a GitHub-hosted runner, so a
+# pull request from a fork — including one from a stranger — never reaches the self-hosted runner
+# that has CorelDRAW installed. The build and the tests stay in ci.yml, which only runs on pushes
+# to main and on demand.
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  docs-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check the documentation
+        shell: pwsh
+        run: ./docs/check-docs.ps1

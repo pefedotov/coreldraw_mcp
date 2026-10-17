@@ -1,0 +1,98 @@
+name: Bug report
+description: Something does not work — the add-on does not load, the endpoint is unreachable, or a tool misbehaves.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Two details decide most cases before anything else: the exact
+        CorelDRAW release and the add-on version. Both are in `server_status`.
+        For a security problem, please **do not** use this form — see
+        [SECURITY.md](../blob/main/.github/SECURITY.md).
+
+  - type: input
+    id: addon-version
+    attributes:
+      label: Add-on version
+      description: "`server_status` → `version`, or the version shown in Add/Remove Programs."
+      placeholder: "1.0.29"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: coreldraw-version
+    attributes:
+      label: CorelDRAW release
+      options:
+        - "CorelDRAW Graphics Suite 2026 (27)"
+        - "CorelDRAW Graphics Suite 2025 (26)"
+        - "Another release (the add-on does not support it)"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: install-method
+    attributes:
+      label: How it was installed
+      options:
+        - "MSI package"
+        - "deploy/install.ps1"
+        - "Hand copy into Programs64\\Addons"
+        - "Not installed yet"
+    validations:
+      required: true
+
+  - type: input
+    id: client
+    attributes:
+      label: MCP client
+      description: Agent/IDE and version, if the problem appears through a client.
+      placeholder: "MiMoCode 1.2, Claude Desktop 0.9, Cursor 1.5, raw HTTP…"
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Numbered steps. If a tool call is involved, paste the JSON-RPC request or the arguments.
+      placeholder: |
+        1. Open Window ▸ Dockers ▸ Corel MCP
+        2. Docker reports "running"
+        3. Call create_star with points: 5 …
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened instead
+      description: Include the error text verbatim if there is one.
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Log excerpt
+      description: |
+        `server_status` reports `logPath`. Paste the last ~50 lines, or call `server_log` with
+        `lines: 50`. The docker's Log pane shows the same output.
+      render: text
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I read `docs/client-config.md` → Troubleshooting.
+          required: false
+        - label: CorelDRAW was restarted after installing or updating the add-on.
+          required: false

@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/CorelMcpAddon.Tests/CorelMcpAddon.Tests.csproj" />
+    <Project Path="src/CorelMcpAddon/CorelMcpAddon.csproj" />
+  </Folder>
+</Solution>

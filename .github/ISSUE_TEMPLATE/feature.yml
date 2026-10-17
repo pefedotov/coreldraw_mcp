@@ -1,0 +1,44 @@
+name: Feature or tool request
+description: A toolbox feature that is missing, or a tool that does not behave as expected.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before filing, check `docs/tools.md`: 22 CorelDRAW toolbox items cannot be driven
+        through the object model at all (they are marked `[~]` there, with the reason). Requests
+        for those cannot be implemented — the tool only works with the mouse.
+
+  - type: textarea
+    id: task
+    attributes:
+      label: What are you trying to do in CorelDRAW?
+      description: Describe the drawing task, not the API you have in mind.
+    validations:
+      required: true
+
+  - type: textarea
+    id: today
+    attributes:
+      label: What happens today
+      description: Which tool did you try, and what came out? If the equivalent has to be done by hand, say so.
+    validations:
+      required: true
+
+  - type: input
+    id: coreldraw-tool
+    attributes:
+      label: CorelDRAW toolbox item this corresponds to, if any
+      placeholder: "Shape ▸ Smudge, Object ▸ Align and Distribute…"
+
+  - type: textarea
+    id: workaround
+    attributes:
+      label: Workaround you use now
+      description: Optional — a chain of existing tools that gets close.
+
+  - type: input
+    id: addon-version
+    attributes:
+      label: Add-on version
+      placeholder: "1.0.29"

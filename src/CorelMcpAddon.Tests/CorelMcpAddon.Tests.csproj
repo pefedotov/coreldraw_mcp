@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <LangVersion>latest</LangVersion>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <CorelDrawVersion Condition="'$(CorelDrawVersion)' == ''">27</CorelDrawVersion>
+    <CorelInstallRoot Condition="'$(CorelInstallRoot)' == ''">C:\Program Files\Corel\CorelDRAW Graphics Suite\$(CorelDrawVersion)</CorelInstallRoot>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CorelMcpAddon\CorelMcpAddon.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Ensure the CorelDRAW object model resolves when the tests load the add-on assembly. -->
+    <Reference Include="Corel.Interop.VGCore">
+      <HintPath>$(CorelInstallRoot)\Programs64\Assemblies\Corel.Interop.VGCore.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,22 @@
+## Build output
+bin/
+obj/
+
+## Ready-to-copy add-on payload (assembled by the build)
+addon/
+TestResults/
+*.binlog
+
+## Installer output
+dist/
+.wix/
+
+## Rider / VS
+.vs/
+.idea/
+*.user
+
+## Add-on runtime artefacts (written next to the deployed DLL)
+corelmcp.log
+*.wixpdb
+install.log
