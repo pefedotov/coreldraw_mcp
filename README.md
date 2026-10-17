@@ -4,7 +4,7 @@
 
 [![build](../../actions/workflows/ci.yml/badge.svg)](../../actions/workflows/ci.yml)
 
-Ask your AI client to draw — and watch it draw in the CorelDRAW document you already have open.
+Ask your AI agent to draw — and watch it draw in the CorelDRAW document you already have open.
 This add-on turns a running CorelDRAW Graphics Suite into a **Model Context Protocol (MCP)
 server**, so MiMoCode, Claude Desktop, Cursor, OpenCode or any other MCP client works with the
 real object model: shapes, text, fills, outlines, effects, layers, pages and export.
@@ -22,7 +22,7 @@ MCP client  ──HTTP(loopback)──▶  CorelDRAW.exe (add-on)  ──VGCore 
 
 ## What you can ask it to do
 
-Once connected, a prompt is enough — the client picks the tools:
+Once connected, a prompt is enough — the agent picks the tools:
 
 > Create an A6 flyer: a 148 × 105 mm rectangle with a gold gradient fill, the title "Autumn Sale"
 > in 36 pt artistic text at the top, and export a 200 dpi PNG next to the document.
@@ -92,7 +92,7 @@ Things worth knowing before you trust it with a real file:
   you were dragging shapes yourself. `Ctrl+Z` undoes it like any other edit.
 - Tools that address shapes use a *1-based index on the active layer*, a *name*, or *your current
   selection*. After an index-inserting call (for example a drop shadow) the indices shift: ask the
-  client to re-read `list_shapes`.
+  agent to re-read `list_shapes`.
 - New primitives keep CorelDRAW's default hairline outline. Ask for "no outline" if you want a pure
   fill.
 - 22 toolbox items cannot be driven programmatically at all — the knife, the eraser, mesh fill,
@@ -110,7 +110,7 @@ protocol layer is Streamable HTTP over JSON-RPC 2.0. Sections below: [Tools](#to
 
 ## Tools
 
-`tools/list` is the source of truth for what this build exposes — ask the client, or call
+`tools/list` is the source of truth for what this build exposes — ask the agent, or call
 `server_status` (it reports `toolCount` and `enabledToolCount`). Capability groups:
 
 | Group | What it covers |
