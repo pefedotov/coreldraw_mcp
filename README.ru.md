@@ -228,7 +228,7 @@ push в `main` и вручную; на pull request выполняется то�
 | Ничего не подключается, панель пишет `running` | Проверьте порт: `Port` в `config.json`, затем `GET http://127.0.0.1:8765/health`. |
 | `Failed to bind to address` | Порт занят — смените `Port` и перезапустите сервер. |
 | Инструмент отвечает «no active document» | Сначала создайте или откройте документ. |
-| Всё остальное | Читайте журнал. Он пишется рядом с аддоном (`corelmcp.log`), а `%LOCALAPPDATA%\CorelMcp\corelmcp.log` — запасной путь, когда эта папка недоступна на запись; `server_status` сообщает фактический путь (`logPath`), те же строки видны на панели **Log**. |
+| Всё остальное | Читайте журнал. Он пишется рядом с аддоном (`corelmcp.log`), если папка доступна на запись, а запасной путь — `%LOCALAPPDATA%\CorelMcp\corelmcp.log`; после установки через MSI используется именно он, потому что `Program Files` недоступна непривилегированному CorelDRAW. `server_status` сообщает фактический путь (`logPath`), те же строки видны на панели **Log**. |
 
 Больше случаев, включая проблемы установки: [`docs/client-config.md`](docs/client-config.md#troubleshooting)
 и [`docs/installing.md`](docs/installing.md).

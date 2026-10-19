@@ -130,9 +130,11 @@ CorelDRAW creates it while starting up, so the endpoint comes up by itself and n
 Closing the docker again makes the start on demand: it then comes up the next time the docker is
 opened. Either way the add-on's log records which path fired — it is written next to the add-on
 as `corelmcp.log`, with `%LOCALAPPDATA%\CorelMcp\corelmcp.log` as the fallback when that folder
-is not writable. `server_status` reports the file it is actually writing to (`logPath`), and the
-same lines are mirrored in the docker's **Log** pane. The `addon` entry point (`CGS.Addon`) is not
-called by CorelDRAW in this configuration; the docker's own constructor is the start path.
+is not writable, which is the case for every MSI install: `Program Files` is not writable for a
+non-elevated CorelDRAW, so that fallback is the file you will find. `server_status` reports the
+file it is actually writing to (`logPath`), and the same lines are mirrored in the docker's
+**Log** pane. The `addon` entry point (`CGS.Addon`) is not called by CorelDRAW in this
+configuration; the docker's own constructor is the start path.
 
 ## Installing by hand (no MSI)
 

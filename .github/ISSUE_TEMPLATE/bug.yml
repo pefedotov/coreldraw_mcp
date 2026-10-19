@@ -15,7 +15,7 @@ body:
     attributes:
       label: Add-on version
       description: "`server_status` → `version`, or the version shown in Add/Remove Programs."
-      placeholder: "1.0.29"
+      placeholder: "1.0.31"
     validations:
       required: true
 

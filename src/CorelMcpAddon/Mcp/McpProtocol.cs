@@ -13,8 +13,28 @@ namespace CorelMcp.Mcp
     public class McpProtocol
     {
         public const string ServerName = "coreldraw_mcp";
-        public const string ServerVersion = "0.2.0";
         public const string LatestProtocolVersion = "2025-06-18";
+
+        /// <summary>
+        /// The add-on's own version, read from the assembly instead of hard-coded: bug reports
+        /// quote <c>server_status</c> → <c>version</c>, so it has to name the build that is
+        /// actually running, not a protocol-layer constant that drifts from the package.
+        /// </summary>
+        public static readonly string ServerVersion = ReadAssemblyVersion();
+
+        private static string ReadAssemblyVersion()
+        {
+            try
+            {
+                var version = typeof(McpProtocol).Assembly.GetName().Version;
+                return version == null ? "0.0.0" : version.ToString(3);
+            }
+            catch (Exception ex)
+            {
+                Log.Warn("Could not read the add-on assembly version: " + ex.Message);
+                return "0.0.0";
+            }
+        }
 
         private static readonly string[] SupportedVersions =
         {

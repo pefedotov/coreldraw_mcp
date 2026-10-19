@@ -60,6 +60,47 @@ sources or the WiX definition change, and the current number is kept in
   tool points at the **Tools** button.
 - `docs/installing.md` said "two ways to deploy" above a table of three.
 
+## [1.0.33] - 2026-10-19
+
+### Security
+
+- **`AllowedRoots` is enforced.** It was documented in the README, `docs/client-config.md` and
+  `SECURITY.md` but no code read it, so `open_document`, `save_document_as`, the five export tools,
+  `import_image`/`import_svg` and a bitmap pattern path accepted any location the CorelDRAW process
+  could reach. A path outside the configured directories is now rejected before CorelDRAW is
+  touched. The comparison is lexical: symlinks and junctions inside an allowed root are not
+  resolved.
+- **A browser page can no longer drive the endpoint.** A request whose `Host` header does not name
+  loopback (DNS rebinding) or whose `Origin` is not a loopback page is answered `403`; CORS echoes
+  the caller's origin instead of `*`; `POST` with a non-JSON content type is answered `415`.
+
+### Fixed
+
+- **`server_status` reports the version of the build that is running.** `version` was a
+  protocol-layer constant (`0.2.0`) frozen at the first draft, while the package was at `1.0.31`;
+  the bug-report form asks for exactly that field, so every report quoted a number that identified
+  nothing. It is now read from the assembly (`1.0.33`), and `initialize`'s `serverInfo.version`
+  follows it.
+- **The documented log path matches what an MSI install produces.**
+  `%LOCALAPPDATA%\CorelMcp\corelmcp.log` was described as a fallback for the rare read-only add-on
+  folder; with the per-machine MSI into `Program Files` it is the only path a non-elevated
+  CorelDRAW can write, so it is the one everyone gets. `README.md`, `README.ru.md` and
+  `docs/installing.md` now say so instead of implying the in-folder file is the normal case.
+  `docs/client-config.md` already had it right.
+- **One slow request no longer stalls the endpoint.** Requests are handled on the thread pool
+  (four at a time, then `503` + `Retry-After`) instead of on the accept loop, so `GET /health` and
+  errors answer while a tool call is waiting for CorelDRAW's UI thread.
+- **`MaxBodyBytes` is applied while reading**, not after the whole body is buffered, and compares
+  bytes rather than UTF-16 characters; a `Content-Length` over the limit is rejected without
+  reading. A `MaxBodyBytes` of `0` or less in `config.json` now falls back to the default instead
+  of rejecting every request.
+- **A timed-out call is no longer executed later.** When CorelDRAW has not picked up a request
+  within `InvokeTimeoutMs`, the queued call is abandoned instead of silently editing the document
+  after the client was told it timed out; a call that had already started is logged as such.
+- Tool errors keep their type across the COM marshalling boundary: `ToolArgumentException` and
+  `McpMethodException` reach their own handlers again instead of arriving as a generic
+  `TargetInvocationException`.
+
 ## [1.0.29] - 2026-10-17
 
 Initial public release. Versions 1.0.0–1.0.28 were private iterations before publication; they

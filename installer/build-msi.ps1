@@ -280,8 +280,10 @@ try {
     }
 
     # Remember the version (and what it was built from) only after a successful build, so a
-    # failed build does not consume a version number.
-    Set-Content -Path $versionFile -Value @($Version, $fingerprint) -Encoding ASCII
+    # failed build does not consume a version number. Written with explicit LF endings: the
+    # repository stores every text file with LF, and Set-Content would put CRLF here.
+    [System.IO.File]::WriteAllText($versionFile, "$Version`n$fingerprint`n",
+        [System.Text.Encoding]::ASCII)
 }
 finally {
     Pop-Location

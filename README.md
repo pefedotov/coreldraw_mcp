@@ -229,7 +229,7 @@ Worth knowing before you script against the API — the reasoning, and the rest 
 | Nothing connects, panel says `running` | Check the port: `config.json` `Port`, then `GET http://127.0.0.1:8765/health`. |
 | `Failed to bind to address` | Port already in use — change `Port` and restart the server. |
 | A tool answers "no active document" | Create or open a document first. |
-| Anything else | Read the log. It is written next to the add-on (`corelmcp.log`), with `%LOCALAPPDATA%\CorelMcp\corelmcp.log` as the fallback when that folder is not writable; `server_status` reports the path in use (`logPath`), and the panel's **Log** pane shows the same lines. |
+| Anything else | Read the log. It is written next to the add-on (`corelmcp.log`) when that folder is writable, and the fallback is `%LOCALAPPDATA%\CorelMcp\corelmcp.log` — which is what an MSI install always gets, because `Program Files` is not writable for a non-elevated CorelDRAW. `server_status` reports the path in use (`logPath`), and the panel's **Log** pane shows the same lines. |
 
 Longer table, plus installation problems: [`docs/client-config.md`](docs/client-config.md#troubleshooting)
 and [`docs/installing.md`](docs/installing.md).
