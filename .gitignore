@@ -16,6 +16,10 @@ dist/
 .idea/
 *.user
 
+## Agent session data (the skills themselves are tracked, under skills/)
+.mimocode/
+node_modules/
+
 ## Add-on runtime artefacts (written next to the deployed DLL)
 corelmcp.log
 *.wixpdb
