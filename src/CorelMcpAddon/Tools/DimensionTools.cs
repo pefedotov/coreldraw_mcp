@@ -55,6 +55,12 @@ namespace CorelMcp.Tools
                     return CorelBridge.Run<JsonValue>(() =>
                     {
                         var layer = ShapeTools.RequireActiveLayer();
+                        // The label unit is a separate enum from cdrUnit. CorelDRAW 27 ignores it
+                        // for the text it generates — a dimension on a two-inch line still reads
+                        // "50,80 мм", and setting Dimension.Linear.Units afterwards is normalised
+                        // straight back to millimetres — so this asks for the document's unit and
+                        // the drawing skill warns that the label may still come out in mm.
+                        var dimensionUnits = Units.DimensionUnits(DocumentTools.RequireActiveDocument().Unit);
                         var app = CorelBridge.Application;
                         var black = app.CreateRGBColor(0, 0, 0);
 
@@ -88,7 +94,7 @@ namespace CorelMcp.Tools
                                 textX ?? (points[0].X + points[1].X) / 2.0,
                                 textY ?? (points[0].Y + points[1].Y) / 2.0,
                                 corel.cdrDimensionStyle.cdrDimensionStyleDecimal, precision, true,
-                                corel.cdrDimensionLinearUnits.cdrDimensionUnitMillimeters, placementValue,
+                                dimensionUnits, placementValue,
                                 true, false, false, prefix, suffix,
                                 0.2, null, black, "", (float)textSize, black);
                         }

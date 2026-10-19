@@ -35,5 +35,36 @@ namespace CorelMcpAddon.Tests
             Assert.Equal(1240, (int)System.Math.Round(widthMm / 25.4 * 150));
             Assert.Equal(1754, (int)System.Math.Round(heightMm / 25.4 * 150));
         }
+
+        /// <summary>
+        /// A dimension label is written in the unit the document uses. CorelDRAW's dimension
+        /// enum is separate from <c>cdrUnit</c>, so every document unit that can hold a drawing
+        /// must map to its dimension counterpart — a missing case silently labels an inch
+        /// drawing in millimetres.
+        /// </summary>
+        [Theory]
+        [InlineData(corel.cdrUnit.cdrMillimeter, corel.cdrDimensionLinearUnits.cdrDimensionUnitMillimeters)]
+        [InlineData(corel.cdrUnit.cdrCentimeter, corel.cdrDimensionLinearUnits.cdrDimensionUnitCentimeters)]
+        [InlineData(corel.cdrUnit.cdrMeter, corel.cdrDimensionLinearUnits.cdrDimensionUnitMeters)]
+        [InlineData(corel.cdrUnit.cdrKilometer, corel.cdrDimensionLinearUnits.cdrDimensionUnitKilometers)]
+        [InlineData(corel.cdrUnit.cdrInch, corel.cdrDimensionLinearUnits.cdrDimensionUnitInches)]
+        [InlineData(corel.cdrUnit.cdrFoot, corel.cdrDimensionLinearUnits.cdrDimensionUnitFtX)]
+        [InlineData(corel.cdrUnit.cdrYard, corel.cdrDimensionLinearUnits.cdrDimensionUnitYards)]
+        [InlineData(corel.cdrUnit.cdrMile, corel.cdrDimensionLinearUnits.cdrDimensionUnitMiles)]
+        [InlineData(corel.cdrUnit.cdrPoint, corel.cdrDimensionLinearUnits.cdrDimensionUnitPoints)]
+        [InlineData(corel.cdrUnit.cdrPica, corel.cdrDimensionLinearUnits.cdrDimensionUnitPicas)]
+        [InlineData(corel.cdrUnit.cdrCicero, corel.cdrDimensionLinearUnits.cdrDimensionUnitCiceros)]
+        public void DocumentUnitMapsToTheMatchingDimensionUnit(corel.cdrUnit document,
+            corel.cdrDimensionLinearUnits expected)
+        {
+            Assert.Equal(expected, Units.DimensionUnits(document));
+        }
+
+        [Fact]
+        public void UnknownDocumentUnitFallsBackToMillimetres()
+        {
+            Assert.Equal(corel.cdrDimensionLinearUnits.cdrDimensionUnitMillimeters,
+                Units.DimensionUnits((corel.cdrUnit)12345));
+        }
     }
 }
