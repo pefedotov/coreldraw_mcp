@@ -1,4 +1,5 @@
 using System;
+using CorelMcp.Config;
 using CorelMcp.Json;
 using CorelMcp.Corel;
 using corel = Corel.Interop.VGCore;
@@ -86,7 +87,7 @@ namespace CorelMcp.Tools
                     else if (name == "bitmap") type = corel.cdrPatternFillType.cdrBitmapPattern;
                     else throw new ToolArgumentException("'patternType' must be twoColor, fullColor or bitmap.");
 
-                    var pattern = ToolArgs.String(args, "pattern", "");
+                    var pattern = AllowedPattern(ToolArgs.String(args, "pattern", ""));
                     var index = ToolArgs.Int(args, "index", 1);
                     var fillWidth = ToolArgs.Bool(args, "fillWidth", false);
 
@@ -295,6 +296,18 @@ namespace CorelMcp.Tools
                     CorelJson.SafeNumber(() => color.CMYYellow) ?? 0,
                     CorelJson.SafeNumber(() => color.CMYKBlack) ?? 0)
             };
+        }
+
+        /// <summary>
+        /// A pattern is either a library name or the path of a bitmap pattern. AllowedRoots
+        /// applies to the second form; library names pass through untouched.
+        /// </summary>
+        private static string AllowedPattern(string pattern)
+        {
+            if (string.IsNullOrEmpty(pattern)) return pattern;
+            if (pattern.IndexOf('\\') < 0 && pattern.IndexOf('/') < 0 && pattern.IndexOf(':') < 0)
+                return pattern;
+            return PathPolicy.EnsureAllowed(pattern, "pattern");
         }
 
         /// <summary>A VGCore Boolean as a JSON boolean, or null when it cannot be read.</summary>

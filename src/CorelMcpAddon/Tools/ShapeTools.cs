@@ -1,5 +1,6 @@
 using System;
 using CorelMcp.Json;
+using CorelMcp.Config;
 using CorelMcp.Corel;
 using corel = Corel.Interop.VGCore;
 
@@ -90,7 +91,7 @@ namespace CorelMcp.Tools
                 Schema.Required(("path", Schema.Str("Absolute path to the file to import."))),
                 args =>
                 {
-                    var path = ToolArgs.String(args, "path");
+                    var path = PathPolicy.EnsureAllowed(ToolArgs.String(args, "path"), "path");
                     return CorelBridge.Run<JsonValue>(() =>
                     {
                         var layer = RequireActiveLayer();
@@ -106,7 +107,7 @@ namespace CorelMcp.Tools
                 Schema.Required(("path", Schema.Str("Absolute path to the .svg file."))),
                 args =>
                 {
-                    var path = ToolArgs.String(args, "path");
+                    var path = PathPolicy.EnsureAllowed(ToolArgs.String(args, "path"), "path");
                     return CorelBridge.Run<JsonValue>(() =>
                     {
                         var layer = RequireActiveLayer();

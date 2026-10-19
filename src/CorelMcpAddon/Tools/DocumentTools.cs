@@ -1,5 +1,6 @@
 using System;
 using CorelMcp.Json;
+using CorelMcp.Config;
 using CorelMcp.Corel;
 using corel = Corel.Interop.VGCore;
 
@@ -40,7 +41,7 @@ namespace CorelMcp.Tools
                     .WithOptional(("unit", Schema.Str("Unit to apply after opening: mm, cm, inch, px."))),
                 args =>
                 {
-                    var path = ToolArgs.String(args, "path");
+                    var path = PathPolicy.EnsureAllowed(ToolArgs.String(args, "path"), "path");
                     var unit = ToolArgs.String(args, "unit", null);
                     return CorelBridge.Run(() =>
                     {
@@ -70,7 +71,7 @@ namespace CorelMcp.Tools
                 Schema.Required(("path", Schema.Str("Destination file path, e.g. C:\\out\\drawing.cdr"))),
                 args =>
                 {
-                    var path = ToolArgs.String(args, "path");
+                    var path = PathPolicy.EnsureAllowed(ToolArgs.String(args, "path"), "path");
                     return CorelBridge.Run<JsonValue>(() =>
                     {
                         var doc = RequireActiveDocument();

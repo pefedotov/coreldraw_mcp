@@ -19,6 +19,13 @@ Defaults that matter:
 | `AllowedRoots` | empty | **no restriction** on file paths passed to tools |
 | `MaxBodyBytes` | 4 MiB | upper bound on request size |
 
+Two checks are always on, regardless of configuration: a request carrying a `Host` header that
+does not name loopback (a DNS-rebinding attempt) or an `Origin` that is not a loopback page (a
+cross-site request from a browser) is answered `403`. When `AllowedRoots` is set, a file-path
+argument outside those directories is rejected before CorelDRAW is touched. The comparison is
+lexical — symlinks and junctions inside an allowed root are not resolved — so treat it as a guard
+against mistakes rather than as a sandbox.
+
 ## If you need more than loopback
 
 1. Set `AuthToken` in `config.json` — requests must then send `Authorization: Bearer <token>`.

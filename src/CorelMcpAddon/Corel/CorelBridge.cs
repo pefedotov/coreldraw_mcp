@@ -1,5 +1,6 @@
 using System;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Windows.Forms;
 using corel = Corel.Interop.VGCore;
@@ -101,25 +102,76 @@ namespace CorelMcp.Corel
             if (marshaller == null)
                 throw new InvalidOperationException("CorelBridge marshaller is not available.");
 
-            T result = default(T);
-            Exception failure = null;
-            var async = marshaller.BeginInvoke((Action)(() =>
-            {
-                try { result = func(); }
-                catch (Exception ex) { failure = ex; }
-            }));
+            var call = new ScheduledCall<T>(func);
+            var async = marshaller.BeginInvoke((Action)(() => call.Execute()));
 
             if (!async.AsyncWaitHandle.WaitOne(InvokeTimeoutMs))
+            {
+                if (call.Abandon())
+                {
+                    Log.Warn("CorelDRAW did not pick up the request within " + InvokeTimeoutMs +
+                             " ms; the request was abandoned before it ran.");
+                    if (async.IsCompleted) { try { marshaller.EndInvoke(async); } catch { } }
+                    throw new TimeoutException(
+                        "CorelDRAW did not process the request within " + InvokeTimeoutMs +
+                        " ms. It may be showing a modal dialog. The request was abandoned and will not run.");
+                }
+
+                // The delegate had already started: the edit may still happen, so say so.
+                Log.Warn("Call timed out after " + InvokeTimeoutMs +
+                         " ms but had already started; CorelDRAW may still apply it.");
                 throw new TimeoutException(
-                    "CorelDRAW did not process the request within " + InvokeTimeoutMs +
+                    "CorelDRAW did not finish the request within " + InvokeTimeoutMs +
                     " ms. It may be showing a modal dialog.");
+            }
 
             marshaller.EndInvoke(async);
 
-            if (failure != null)
-                throw new TargetInvocationException(failure.Message, failure);
+            // Rethrow the original exception (type and stack intact) instead of wrapping it:
+            // ToolArgumentException and McpMethodException must reach their own handlers in
+            // the protocol layer, otherwise every COM-side mistake looks like a server error.
+            if (call.Failure != null) ExceptionDispatchInfo.Capture(call.Failure).Throw();
 
-            return result;
+            return call.Result;
+        }
+
+        /// <summary>
+        /// One marshalled call. The UI thread may pick the delegate up long after the caller
+        /// gave up, so it re-checks a state flag before touching CorelDRAW.
+        /// </summary>
+        private sealed class ScheduledCall<T>
+        {
+            private const int Pending = 0;
+            private const int Running = 1;
+            private const int Abandoned = 2;
+
+            private readonly Func<T> _func;
+            private int _state;
+
+            public T Result;
+            public Exception Failure;
+
+            public ScheduledCall(Func<T> func)
+            {
+                _func = func;
+            }
+
+            /// <summary>Runs on CorelDRAW's UI thread; a no-op when the caller gave up already.</summary>
+            public void Execute()
+            {
+                if (Interlocked.CompareExchange(ref _state, Running, Pending) != Pending) return;
+                try { Result = _func(); }
+                catch (Exception ex) { Failure = ex; }
+            }
+
+            /// <summary>
+            /// Cancel a call that has not started yet. False means it is already running and
+            /// cannot be stopped.
+            /// </summary>
+            public bool Abandon()
+            {
+                return Interlocked.CompareExchange(ref _state, Abandoned, Pending) == Pending;
+            }
         }
 
         public static void Run(Action action)

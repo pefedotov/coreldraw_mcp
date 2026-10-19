@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using CorelMcp.Config;
 using CorelMcp.Json;
 using CorelMcp.Corel;
 using corel = Corel.Interop.VGCore;
@@ -54,7 +55,7 @@ namespace CorelMcp.Tools
                       .WithTarget(("range", Schema.Str("'page' (default), 'all' or 'selection'."))),
                 args =>
                 {
-                    var path = ToolArgs.String(args, "path");
+                    var path = PathPolicy.EnsureAllowed(ToolArgs.String(args, "path"), "path");
                     return CorelBridge.Run<JsonValue>(() => PublishPdf(args, path));
                 });
 
@@ -79,7 +80,7 @@ namespace CorelMcp.Tools
                           ("compression", Schema.Str("none, zip (default) or lzw."))),
                 args =>
                 {
-                    var path = ToolArgs.String(args, "path");
+                    var path = PathPolicy.EnsureAllowed(ToolArgs.String(args, "path"), "path");
                     var format = ToolArgs.String(args, "format").Trim().TrimStart('.').ToLowerInvariant();
                     (corel.cdrFilter filter, bool raster) entry;
                     if (!Formats.TryGetValue(format, out entry))
@@ -119,7 +120,7 @@ namespace CorelMcp.Tools
                           ("compression", Schema.Str("none, zip (default) or lzw."))),
                 args =>
                 {
-                    var path = ToolArgs.String(args, "path");
+                    var path = PathPolicy.EnsureAllowed(ToolArgs.String(args, "path"), "path");
                     return CorelBridge.Run<JsonValue>(() =>
                     {
                         var doc = DocumentTools.RequireActiveDocument();
@@ -145,7 +146,7 @@ namespace CorelMcp.Tools
 
         private static JsonValue VectorShortcut(JsonObject args, string format, corel.cdrFilter filter)
         {
-            var path = ToolArgs.String(args, "path");
+            var path = PathPolicy.EnsureAllowed(ToolArgs.String(args, "path"), "path");
             return CorelBridge.Run<JsonValue>(() =>
             {
                 var doc = DocumentTools.RequireActiveDocument();
@@ -465,6 +466,30 @@ namespace CorelMcp.Tools
                 case corel.cdrUnit.cdrPica: return value * MmPerInch / 6.0;
                 case corel.cdrUnit.cdrCicero: return value * MmPerInch / 72.0 * 12.0;
                 default: return value;
+            }
+        }
+
+        /// <summary>
+        /// The dimension-label unit that matches the document unit. CorelDRAW keeps a separate
+        /// enum for dimension text; without this mapping a drawing in inches gets its
+        /// measurements labelled in millimetres.
+        /// </summary>
+        public static corel.cdrDimensionLinearUnits DimensionUnits(corel.cdrUnit unit)
+        {
+            switch (unit)
+            {
+                case corel.cdrUnit.cdrMillimeter: return corel.cdrDimensionLinearUnits.cdrDimensionUnitMillimeters;
+                case corel.cdrUnit.cdrCentimeter: return corel.cdrDimensionLinearUnits.cdrDimensionUnitCentimeters;
+                case corel.cdrUnit.cdrMeter: return corel.cdrDimensionLinearUnits.cdrDimensionUnitMeters;
+                case corel.cdrUnit.cdrKilometer: return corel.cdrDimensionLinearUnits.cdrDimensionUnitKilometers;
+                case corel.cdrUnit.cdrInch: return corel.cdrDimensionLinearUnits.cdrDimensionUnitInches;
+                case corel.cdrUnit.cdrFoot: return corel.cdrDimensionLinearUnits.cdrDimensionUnitFtX;
+                case corel.cdrUnit.cdrYard: return corel.cdrDimensionLinearUnits.cdrDimensionUnitYards;
+                case corel.cdrUnit.cdrMile: return corel.cdrDimensionLinearUnits.cdrDimensionUnitMiles;
+                case corel.cdrUnit.cdrPoint: return corel.cdrDimensionLinearUnits.cdrDimensionUnitPoints;
+                case corel.cdrUnit.cdrPica: return corel.cdrDimensionLinearUnits.cdrDimensionUnitPicas;
+                case corel.cdrUnit.cdrCicero: return corel.cdrDimensionLinearUnits.cdrDimensionUnitCiceros;
+                default: return corel.cdrDimensionLinearUnits.cdrDimensionUnitMillimeters;
             }
         }
     }

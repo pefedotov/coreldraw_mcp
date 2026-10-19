@@ -45,17 +45,37 @@ namespace CorelMcp.Config
         /// <summary>Path of the config.json this instance was loaded from. Not persisted.</summary>
         public string ConfigPath { get; private set; }
 
+        /// <summary>
+        /// The configuration the add-on loaded at startup. Tools read AllowedRoots from here;
+        /// the docker panel edits the same instance, so a change applies without a restart.
+        /// </summary>
+        public static AddonConfig Current { get; set; }
+
         /// <summary>The disabled tool names as an array, ignoring blanks.</summary>
         public string[] DisabledToolNames()
         {
-            if (string.IsNullOrEmpty(DisabledTools)) return new string[0];
-            var names = new List<string>();
-            foreach (var part in DisabledTools.Split(','))
+            return SplitList(DisabledTools, ',');
+        }
+
+        /// <summary>
+        /// The AllowedRoots entries as an array, ignoring blanks. Both ',' and ';' separate
+        /// entries, because a Windows path list is normally written with semicolons.
+        /// </summary>
+        public string[] AllowedRootNames()
+        {
+            return SplitList(AllowedRoots, ',', ';');
+        }
+
+        private static string[] SplitList(string value, params char[] separators)
+        {
+            if (string.IsNullOrEmpty(value)) return new string[0];
+            var parts = new List<string>();
+            foreach (var part in value.Split(separators))
             {
-                var name = part.Trim();
-                if (name.Length > 0) names.Add(name);
+                var trimmed = part.Trim();
+                if (trimmed.Length > 0) parts.Add(trimmed);
             }
-            return names.ToArray();
+            return parts.ToArray();
         }
 
         /// <summary>Write the current settings back to config.json.</summary>
@@ -85,6 +105,8 @@ namespace CorelMcp.Config
                     loaded.ConfigPath = path;
                     if (loaded.Port <= 0 || loaded.Port > 65535) loaded.Port = cfg.Port;
                     if (string.IsNullOrWhiteSpace(loaded.BindAddress)) loaded.BindAddress = cfg.BindAddress;
+                    if (loaded.MaxBodyBytes <= 0) loaded.MaxBodyBytes = cfg.MaxBodyBytes;
+                    Current = loaded;
                     return loaded;
                 }
                 else
@@ -96,6 +118,7 @@ namespace CorelMcp.Config
             {
                 Log.Warn("Could not read config.json (" + ex.Message + "); using defaults.");
             }
+            Current = cfg;
             return cfg;
         }
 
