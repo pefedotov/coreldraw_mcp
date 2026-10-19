@@ -45,7 +45,10 @@ different interop assemblies, so a DLL built for one cannot be dropped into the 
 2. Give every parameter a description; a client's model sees only what you write there.
 3. Cover it in `src/CorelMcpAddon.Tests/ToolCatalogTests.cs` (the registry is checked for
    uniqueness and schema sanity).
-4. Do not hard-code the tool count anywhere in prose — `tools/list` and `server_status` are the
+4. Describe it in `skills/coreldraw-mcp-drawing/references/tool-reference.md` — the skills are what
+   a client's model reads. `docs/check-docs.ps1` fails when a registered tool is mentioned by no
+   file under `skills/`.
+5. Do not hard-code the tool count anywhere in prose — `tools/list` and `server_status` are the
    source of truth. `docs/check-docs.ps1` fails the build if a number sneaks back in.
 
 ## Documentation
@@ -55,6 +58,8 @@ different interop assemblies, so a DLL built for one cannot be dropped into the 
 - `docs/client-config.md` owns the `config.json` table and the tool group list.
 - `docs/tools.md` owns the toolbox coverage checklist.
 - `docs/installing.md` owns packaging and deployment.
+- `skills/` owns the agent-facing instructions (setup, drawing, export). They are shipped, not
+  local notes: changing a tool name, an argument or a default is a change to a skill too.
 - Do not restate the same table in two files — link to the owner instead.
 
 Run the checker before opening a PR:

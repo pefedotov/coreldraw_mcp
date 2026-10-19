@@ -95,7 +95,7 @@ Things worth knowing before you trust it with a real file:
   agent to re-read `list_shapes`.
 - New primitives keep CorelDRAW's default hairline outline. Ask for "no outline" if you want a pure
   fill.
-- 22 toolbox items cannot be driven programmatically at all — the knife, the eraser, mesh fill,
+- Some toolbox items cannot be driven programmatically at all — the knife, the eraser, mesh fill,
   Smart Drawing and others work only with the mouse. The full list, with reasons, is in
   [`docs/tools.md`](docs/tools.md).
 - The panel's **Tools** button lets you untick anything you do not want an agent to touch. The
@@ -130,7 +130,7 @@ protocol layer is Streamable HTTP over JSON-RPC 2.0. Sections below: [Tools](#to
 
 The canonical, complete group-by-group list lives in
 [`docs/client-config.md`](docs/client-config.md#tools); the toolbox coverage checklist — including
-the 22 items the object model cannot reach — in [`docs/tools.md`](docs/tools.md).
+the items the object model cannot reach — in [`docs/tools.md`](docs/tools.md).
 
 ## Configuration
 
@@ -165,6 +165,8 @@ src/CorelMcpAddon/          the add-on
   Config/                   config.json model
   Ui/                       the docked panel
 src/CorelMcpAddon.Tests/    xUnit tests — pure unit tests, no CorelDRAW required
+skills/                     three agent skills (setup, drawing, export): the rules a
+                            client's model needs to drive the tools correctly
 docs/                       installing, client config, toolbox coverage, doc checker
 installer/                  WiX definition, build and signing script, EULA, version.txt
 deploy/install.ps1          development deploy
@@ -252,6 +254,7 @@ CorelDRAW to anyone on the network. Reporting a vulnerability: [`SECURITY.md`](.
 - [`docs/installing.md`](docs/installing.md) — MSI, SmartScreen and UAC prompts, deployment, packaging internals
 - [`docs/client-config.md`](docs/client-config.md) — connecting clients, `config.json`, tool groups, troubleshooting
 - [`docs/tools.md`](docs/tools.md) — toolbox coverage checklist (`[x]` implemented, `[~]` not reachable through the object model)
+- [`skills/`](skills/) — agent-facing instructions: connecting, drawing rules, export and its formats
 - [`CHANGELOG.md`](CHANGELOG.md) — version history
 - [`CONTRIBUTING.md`](.github/CONTRIBUTING.md) — building, testing, adding a tool
 

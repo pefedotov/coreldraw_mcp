@@ -197,6 +197,35 @@ foreach ($pair in @(@{ Name = 'README.md'; Lines = $en }, @{ Name = 'README.ru.m
     }
 }
 
+# --- 5. Every registered tool must be described in the agent skills ------------------------
+# The skills are what a client's model reads; a tool that no skill mentions is a tool the agent
+# will not use (or will misuse). Adding a tool means touching the registry, and this check catches
+# the case where the skill reference was forgotten.
+$skillFiles = @(Get-ChildItem -Path (Join-Path $repoRoot 'skills') -Recurse -File -Filter *.md -ErrorAction SilentlyContinue)
+if ($skillFiles.Count -eq 0) {
+    $problems.Add("skills/ is missing or empty: no markdown files found under $repoRoot\skills.")
+}
+else {
+    $skillText = ($skillFiles | ForEach-Object { [System.IO.File]::ReadAllText($_.FullName, $utf8) }) -join "`n"
+    $toolSources = @(Get-ChildItem -Path (Join-Path $repoRoot 'src\CorelMcpAddon\Tools') -File -Filter *.cs)
+    $registered = New-Object System.Collections.Generic.List[string]
+    foreach ($source in $toolSources) {
+        $code = [System.IO.File]::ReadAllText($source.FullName, $utf8)
+        foreach ($match in [regex]::Matches($code, 'registry\.Define\(\s*"([a-z_0-9]+)"')) {
+            $name = $match.Groups[1].Value
+            if (-not $registered.Contains($name)) { $registered.Add($name) }
+        }
+    }
+    if ($registered.Count -eq 0) {
+        $problems.Add("No tool registrations found under src\CorelMcpAddon\Tools: the coverage check cannot run.")
+    }
+    foreach ($name in $registered) {
+        if ($skillText -notmatch ('(?<![a-z_])' + [regex]::Escape($name) + '(?![a-z_])')) {
+            $problems.Add("Tool '$name' is registered but no file under skills/ mentions it.")
+        }
+    }
+}
+
 # --- Report --------------------------------------------------------------------------------
 if ($problems.Count -eq 0) {
     Write-Host "docs check: OK ($($markdownFiles.Count) files, $($enHeadings.Count) headings paired)" -ForegroundColor Green

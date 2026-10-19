@@ -50,6 +50,14 @@ sources or the WiX definition change, and the current number is kept in
   ("Remove the outline."), and 59 parameters were one to three words ("Top edge."). Coordinates now
   name their unit and their axis, indices say 1-based on the layer, and levels give their range —
   a client's model sees nothing but these strings.
+- **The three agent skills ship with the repository** (`skills/`, seven files: a `SKILL.md` each for
+  setup, drawing and export, plus four reference files). They were local notes before, so a clone
+  got no agent instructions at all. `docs/check-docs.ps1` now fails when a registered tool is
+  mentioned by no skill — the check that would have caught four undocumented tools
+  (`create_connector`, `create_dimension`, `list_objects`, `set_object_name`).
+- **The README no longer states how many toolbox items are unreachable.** `docs/tools.md` is the
+  single source of truth for coverage, and the number had drifted (it said 22 while the checklist
+  listed 21 distinct items — `Rollover` appeared twice, now once, under interactive effects).
 
 ### Fixed
 

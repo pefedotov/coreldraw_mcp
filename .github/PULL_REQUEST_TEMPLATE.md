@@ -14,6 +14,7 @@
 ## Checklist
 
 - [ ] `README.md` and `README.ru.md` are both updated (same headings, same content)
+- [ ] `skills/` updated when a tool name, argument or default changed
 - [ ] no tool count, log path or `config.json` table restated outside its owning document
 - [ ] no build output committed (`bin/`, `obj/`, `dist/`, `addon/`, `*.wixpdb`)
 - [ ] `installer/version.txt` untouched

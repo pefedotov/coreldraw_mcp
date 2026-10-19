@@ -22,6 +22,9 @@ Legend:
 - `[~]` — cannot be implemented: the item has no programmatic interface in CorelDRAW's object
   model (VGCore) and works only interactively with the mouse.
 
+One line can cover several related toolbox buttons (the three shape-modification tools,
+the four Artistic Media variants), so counting lines and counting buttons are different things.
+
 ## 1. Selection and navigation / Выделение и навигация
 
 - `[x]` **Pick** (Выбор) — `select_shapes` / `clear_selection` / `get_selection`
@@ -142,7 +145,6 @@ Legend:
 - `[x]` **PowerClip** — `place_in_powerclip` / `extract_powerclip`
 - `[x]` **Clone** (Клонирование) — `clone_shape`
 - `[~]` **Symmetry** (Симметрия) — no programmatic interface
-- `[~]` **Rollover** (Ролловер) — no programmatic interface
 
 ## 9. Page, layers, layout / Страница, слои, макет
 
