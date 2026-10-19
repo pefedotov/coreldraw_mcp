@@ -58,6 +58,14 @@ sources or the WiX definition change, and the current number is kept in
 - **The README no longer states how many toolbox items are unreachable.** `docs/tools.md` is the
   single source of truth for coverage, and the number had drifted (it said 22 while the checklist
   listed 21 distinct items — `Rollover` appeared twice, now once, under interactive effects).
+- **The self-hosted build workflow is gone.** `ci.yml` had not run a single time: no runner with the
+  `coreldraw` label was registered, so `build-test` waited 24 hours for an executor and was
+  cancelled, while the README badge stayed red even though the code built and 134 tests passed
+  locally. `.github/workflows/docs.yml` is now the only workflow — it runs
+  `docs/check-docs.ps1` on pushes to `main` and on pull requests, and the badge reflects it. The
+  build and the tests are local steps, as they always effectively were; `CONTRIBUTING.md` says why,
+  and the workflow can be restored from git history if a machine with CorelDRAW ever becomes a
+  permanent runner.
 
 ### Fixed
 

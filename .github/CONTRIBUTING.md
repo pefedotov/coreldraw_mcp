@@ -13,11 +13,10 @@ hosts an MCP server on loopback. Bug reports and documentation fixes are as welc
 | WiX Toolset v5 | restored as a local dotnet tool (`dotnet tool restore`); needed only for the MSI |
 
 There is **no way around the CorelDRAW install**: without `Corel.Interop.VGCore.dll` the project
-does not compile. That is also why the build runs on a self-hosted Windows runner
-(`.github/workflows/ci.yml`) — and why that workflow deliberately has **no `pull_request` trigger**:
-a pull request from a fork would execute the fork's code on a machine that has CorelDRAW installed.
-Pull requests are checked by `.github/workflows/docs.yml` instead, which is hosted and does not
-need CorelDRAW. Do not merge the two files back together.
+does not compile. That is also why there is **no CI build** — a runner able to build it would have
+to be a licensed Windows machine. Run `dotnet build` and `dotnet test` locally before opening a
+pull request; what CI checks automatically, on a hosted runner, is the documentation
+(`.github/workflows/docs.yml`).
 
 ## Build, test, deploy
 

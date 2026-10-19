@@ -2,7 +2,7 @@
 
 **Русская версия: [README.ru.md](README.ru.md)**
 
-[![build](../../actions/workflows/ci.yml/badge.svg)](../../actions/workflows/ci.yml)
+[![docs](../../actions/workflows/docs.yml/badge.svg)](../../actions/workflows/docs.yml)
 
 Ask your AI agent to draw — and watch it draw in the CorelDRAW document you already have open.
 This add-on turns a running CorelDRAW Graphics Suite into a **Model Context Protocol (MCP)
@@ -202,13 +202,14 @@ The tests are pure xUnit: they exercise the tool registry, the JSON layer, the J
 the config model, unit conversion and drawing geometry. The interop assembly must be present for
 the reference to resolve, but CorelDRAW itself does not have to be running.
 
-CI (`.github/workflows/ci.yml`) runs the same commands on a **self-hosted Windows runner labelled
-`coreldraw`**, because no hosted runner has `Corel.Interop.VGCore.dll`. It runs on pushes to `main`
-and on demand; pull requests run only the documentation check (`.github/workflows/docs.yml`) on a
-hosted runner, so a fork never executes code on the machine that has CorelDRAW. External forks
-therefore cannot go green without a CorelDRAW licence — that is a property of the project, not a
-failing build. `build-msi.ps1` bumps the patch version automatically, and only after a successful
-build. Setup and contribution rules: [`CONTRIBUTING.md`](.github/CONTRIBUTING.md).
+There is no hosted build: every file under `src/CorelMcpAddon/Tools` compiles against
+`Corel.Interop.VGCore.dll`, which ships only with CorelDRAW, so a build runner would have to be a
+licensed Windows machine. Build and test locally with the commands above before opening a pull
+request. What does run automatically — on pushes to `main` and on every pull request, on a hosted
+runner — is `docs/check-docs.ps1`: the two READMEs stay in step, every relative link and anchor
+resolves, no tool count is hard-coded in prose, and every registered tool is described in
+`skills/`. `build-msi.ps1` bumps the patch version itself, and only after a successful build.
+Setup and contribution rules: [`CONTRIBUTING.md`](.github/CONTRIBUTING.md).
 
 ## Known quirks
 

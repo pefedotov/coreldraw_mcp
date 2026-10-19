@@ -1,12 +1,17 @@
 name: docs
 
-# Pull-request checks.
+# The only automatic check.
 #
-# Everything that can be validated without CorelDRAW lives here, on a GitHub-hosted runner, so a
-# pull request from a fork — including one from a stranger — never reaches the self-hosted runner
-# that has CorelDRAW installed. The build and the tests stay in ci.yml, which only runs on pushes
-# to main and on demand.
+# It runs on pushes to main and on every pull request, on a GitHub-hosted runner, so a pull
+# request from a stranger never executes anything on a machine that has CorelDRAW installed.
+#
+# The build and the tests are deliberately not here: every file under src/CorelMcpAddon/Tools
+# compiles against Corel.Interop.VGCore.dll, which ships only with CorelDRAW. A runner able to
+# build the project would have to be a licensed Windows machine, so building and testing are
+# local steps - see "Build, test, deploy" in CONTRIBUTING.md.
 on:
+  push:
+    branches: [main]
   pull_request:
 
 permissions:

@@ -2,7 +2,7 @@
 
 **English version: [README.md](README.md)**
 
-[![build](../../actions/workflows/ci.yml/badge.svg)](../../actions/workflows/ci.yml)
+[![docs](../../actions/workflows/docs.yml/badge.svg)](../../actions/workflows/docs.yml)
 
 Попросите ИИ-агента нарисовать — и он нарисует в том документе CorelDRAW, который у вас открыт.
 Надстройка превращает запущенный CorelDRAW Graphics Suite в **MCP-сервер** (Model Context
@@ -199,14 +199,14 @@ dotnet test  src\CorelMcpAddon.Tests\CorelMcpAddon.Tests.csproj
 конфигурации, преобразование единиц и геометрию построений. Сборка interop должна быть на месте,
 чтобы разрешилась ссылка, но сам CorelDRAW запускать не требуется.
 
-CI (`.github/workflows/ci.yml`) выполняет те же команды на **self-hosted Windows-раннере с меткой
-`coreldraw`**: ни на одном хостируемом раннере нет `Corel.Interop.VGCore.dll`. Запускается он на
-push в `main` и вручную; на pull request выполняется только проверка документации
-(`.github/workflows/docs.yml`) на хостируемом раннере, поэтому код форка никогда не попадает на
-машину с CorelDRAW. Внешние форки не могут получить зелёную галочку без лицензии CorelDRAW — это
-свойство проекта, а не признак сломанной сборки. `build-msi.ps1` поднимает номер патча сам и только
-после успешной сборки. Требования и правила участия:
-[`CONTRIBUTING.md`](.github/CONTRIBUTING.md).
+Хостируемой сборки нет: каждый файл в `src/CorelMcpAddon/Tools` компилируется против
+`Corel.Interop.VGCore.dll`, который поставляется только с CorelDRAW, поэтому раннер для сборки —
+это обязательно машина с лицензией и Windows. Собирайте и тестируйте локально командами выше перед
+открытием pull request. Автоматически — на push в `main` и на каждом pull request, на хостируемом
+раннере — выполняется `docs/check-docs.ps1`: два README не разъезжаются, все относительные ссылки и
+анкоры разрешаются, число инструментов не захардкожено в прозе, и каждый зарегистрированный
+инструмент описан в `skills/`. `build-msi.ps1` поднимает номер патча сам и только после успешной
+сборки. Требования и правила участия: [`CONTRIBUTING.md`](.github/CONTRIBUTING.md).
 
 ## Особенности поведения
 
