@@ -55,6 +55,11 @@ sources or the WiX definition change, and the current number is kept in
   got no agent instructions at all. `docs/check-docs.ps1` now fails when a registered tool is
   mentioned by no skill — the check that would have caught four undocumented tools
   (`create_connector`, `create_dimension`, `list_objects`, `set_object_name`).
+- **`docs/check-docs.ps1` checks the code, not just the prose.** Three rules were added: every tool
+  cited in `docs/tools.md` must be a registered one, every field of `src/CorelMcpAddon/config.json`
+  must appear in the `docs/client-config.md` table with its default, and the version in
+  `installer/version.txt` must have a CHANGELOG section. The last one is why 1.0.35 finally has an
+  entry.
 - **The README no longer states how many toolbox items are unreachable.** `docs/tools.md` is the
   single source of truth for coverage, and the number had drifted (it said 22 while the checklist
   listed 21 distinct items — `Rollover` appeared twice, now once, under interactive effects).
@@ -75,6 +80,20 @@ sources or the WiX definition change, and the current number is kept in
   `401` names `AuthToken`, `405` says POST, an unknown tool says to call `tools/list`, a disabled
   tool points at the **Tools** button.
 - `docs/installing.md` said "two ways to deploy" above a table of three.
+
+## [1.0.35] - 2026-10-19
+
+### Fixed
+
+- **`create_dimension` asks CorelDRAW for the document's unit** instead of passing millimetres.
+  `Units.DimensionUnits` maps `cdrUnit` to CorelDRAW's separate dimension-unit enum, and
+  `create_dimension` now passes `document.Unit`. Live testing showed 27.x still labels the text in
+  millimetres whatever is passed and normalises `Dimension.Linear.Units` back to
+  `cdrDimensionUnitMM`, so the drawing skill states that limitation instead of promising units that
+  do not arrive; the remaining lever is likely the dimension style in `Document.StyleSheet`.
+
+Published as [v1.0.35](https://github.com/pefedotov/coreldraw_mcp/releases/tag/v1.0.35).
+Versions 1.0.31, 1.0.32 and 1.0.34 were build iterations and were never published.
 
 ## [1.0.33] - 2026-10-19
 

@@ -77,6 +77,20 @@ function Get-ParallelLink([string]$target) {
     return $target
 }
 
+# Tool names as the code registers them. One place, because three checks need the same list.
+function Get-RegisteredTools {
+    $tools = New-Object System.Collections.Generic.List[string]
+    $sources = Get-ChildItem -Path (Join-Path $repoRoot 'src\CorelMcpAddon\Tools') -File -Filter *.cs -ErrorAction SilentlyContinue
+    foreach ($source in $sources) {
+        $code = [System.IO.File]::ReadAllText($source.FullName, $utf8)
+        foreach ($match in [regex]::Matches($code, 'registry\.Define\(\s*"([a-z_0-9]+)"')) {
+            $name = $match.Groups[1].Value
+            if (-not $tools.Contains($name)) { $tools.Add($name) }
+        }
+    }
+    return $tools
+}
+
 # --- 1. The two READMEs must stay structurally parallel -------------------------------------
 $en = Read-Lines $readmeEn
 $ru = Read-Lines $readmeRu
@@ -201,27 +215,91 @@ foreach ($pair in @(@{ Name = 'README.md'; Lines = $en }, @{ Name = 'README.ru.m
 # The skills are what a client's model reads; a tool that no skill mentions is a tool the agent
 # will not use (or will misuse). Adding a tool means touching the registry, and this check catches
 # the case where the skill reference was forgotten.
+$registered = @(Get-RegisteredTools)
+if ($registered.Count -eq 0) {
+    $problems.Add("No tool registrations found under src\CorelMcpAddon\Tools: the coverage checks cannot run.")
+}
+
 $skillFiles = @(Get-ChildItem -Path (Join-Path $repoRoot 'skills') -Recurse -File -Filter *.md -ErrorAction SilentlyContinue)
 if ($skillFiles.Count -eq 0) {
     $problems.Add("skills/ is missing or empty: no markdown files found under $repoRoot\skills.")
 }
 else {
     $skillText = ($skillFiles | ForEach-Object { [System.IO.File]::ReadAllText($_.FullName, $utf8) }) -join "`n"
-    $toolSources = @(Get-ChildItem -Path (Join-Path $repoRoot 'src\CorelMcpAddon\Tools') -File -Filter *.cs)
-    $registered = New-Object System.Collections.Generic.List[string]
-    foreach ($source in $toolSources) {
-        $code = [System.IO.File]::ReadAllText($source.FullName, $utf8)
-        foreach ($match in [regex]::Matches($code, 'registry\.Define\(\s*"([a-z_0-9]+)"')) {
-            $name = $match.Groups[1].Value
-            if (-not $registered.Contains($name)) { $registered.Add($name) }
-        }
-    }
-    if ($registered.Count -eq 0) {
-        $problems.Add("No tool registrations found under src\CorelMcpAddon\Tools: the coverage check cannot run.")
-    }
     foreach ($name in $registered) {
         if ($skillText -notmatch ('(?<![a-z_])' + [regex]::Escape($name) + '(?![a-z_])')) {
             $problems.Add("Tool '$name' is registered but no file under skills/ mentions it.")
+        }
+    }
+}
+
+# --- 6. Every tool cited in docs/tools.md must exist ----------------------------------------
+# The checklist names a tool next to every toolbox item it can drive. A renamed or deleted tool
+# leaves a name behind that reads like documentation and is not: the reverse of check 5.
+# Only snake_case identifiers are compared, because the same file quotes argument values in
+# backticks as well ("bezier", "gamma", "type").
+$toolboxLines = Read-Lines $toolbox
+$cited = New-Object System.Collections.Generic.List[string]
+foreach ($line in $toolboxLines) {
+    foreach ($match in [regex]::Matches($line, '`([a-z][a-z0-9]*_[a-z0-9_]+)`')) {
+        if (-not $cited.Contains($match.Groups[1].Value)) { $cited.Add($match.Groups[1].Value) }
+    }
+}
+foreach ($name in $cited) {
+    if ($registered -notcontains $name) {
+        $problems.Add("docs/tools.md cites '$name', which is not a registered tool.")
+    }
+}
+
+# --- 7. Every config.json field must be in the configuration table -------------------------
+# The table in docs/client-config.md is what a user edits. A field that exists in the shipped
+# config.json and is missing from the table is a feature nobody finds (DisabledTools was that
+# field once). The default is compared too, so a changed default cannot leave a stale table behind.
+$configPath = Join-Path $repoRoot 'src\CorelMcpAddon\config.json'
+$configDoc = Join-Path $repoRoot 'docs\client-config.md'
+if (-not (Test-Path $configPath)) {
+    $problems.Add("Missing src\CorelMcpAddon\config.json: the configuration table cannot be checked.")
+}
+elseif (-not (Test-Path $configDoc)) {
+    $problems.Add("Missing docs\client-config.md: the configuration table cannot be checked.")
+}
+else {
+    $shippedConfig = [System.IO.File]::ReadAllText($configPath, $utf8) | ConvertFrom-Json
+    $configLines = Read-Lines $configDoc
+    foreach ($field in $shippedConfig.PSObject.Properties) {
+        $rowPattern = '\|\s*`' + [regex]::Escape($field.Name) + '`\s*\|'
+        $row = $configLines | Where-Object { $_ -match $rowPattern } | Select-Object -First 1
+        if (-not $row) {
+            $problems.Add("config.json has '$($field.Name)', but docs/client-config.md documents no such field.")
+            continue
+        }
+        $default = [string]$field.Value
+        if ($field.Value -is [bool]) { $default = $default.ToLowerInvariant() }
+        if ($default.Length -eq 0) { $default = '""' }
+        if ($row -notmatch [regex]::Escape($default)) {
+            $problems.Add("docs/client-config.md documents '$($field.Name)' without its default '$default'.")
+        }
+    }
+}
+
+# --- 8. The version in version.txt must have a CHANGELOG section ---------------------------
+# The package version is bumped by the build script; the changelog is written by hand, and that is
+# exactly the pair that drifts - 1.0.34 and 1.0.35 shipped with no entry at all.
+$versionPath = Join-Path $repoRoot 'installer\version.txt'
+$changelogPath = Join-Path $repoRoot 'CHANGELOG.md'
+if (Test-Path $versionPath) {
+    $version = @(Read-Lines $versionPath)[0].Trim()
+    if ($version -notmatch '^\d+\.\d+\.\d+$') {
+        $problems.Add("installer/version.txt does not start with an x.y.z version (got '$version').")
+    }
+    elseif (-not (Test-Path $changelogPath)) {
+        $problems.Add("Missing CHANGELOG.md: the released version cannot be checked.")
+    }
+    else {
+        $changelogLines = Read-Lines $changelogPath
+        $sectionPattern = '^##\s*\[' + [regex]::Escape($version) + '\]'
+        if (-not ($changelogLines | Where-Object { $_ -match $sectionPattern })) {
+            $problems.Add("installer/version.txt says $version, but CHANGELOG.md has no '## [$version]' section.")
         }
     }
 }

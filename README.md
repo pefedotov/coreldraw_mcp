@@ -207,7 +207,9 @@ There is no hosted build: every file under `src/CorelMcpAddon/Tools` compiles ag
 licensed Windows machine. Build and test locally with the commands above before opening a pull
 request. What does run automatically — on pushes to `main` and on every pull request, on a hosted
 runner — is `docs/check-docs.ps1`: the two READMEs stay in step, every relative link and anchor
-resolves, no tool count is hard-coded in prose, and every registered tool is described in
+resolves, no tool count is hard-coded in prose, every tool cited in `docs/tools.md` is a registered
+one, every field of `config.json` is in the configuration table, the version in
+`installer/version.txt` has a CHANGELOG section, and every registered tool is described in
 `skills/`. `build-msi.ps1` bumps the patch version itself, and only after a successful build.
 Setup and contribution rules: [`CONTRIBUTING.md`](.github/CONTRIBUTING.md).
 
